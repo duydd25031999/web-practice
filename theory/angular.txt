@@ -1,0 +1,164 @@
+App
+    - 1 or more modules
+    Module
+        - 1 or more components and services
+        - interact and render view in the browser
+        Component
+            template
+                - angular ko có else if
+            style
+            class
+                - typescript
+                @Component
+                    selector
+                        - define cách gọi component trong html
+                        selector: 'tag-name'
+                            call : <tag-name></tag-name>
+                        selector: '.class-name'
+                            call : <element class=".tag-name"></element>
+                        selector: '[attribute-name]'
+                            call : <element attribute-name></element>
+                    template
+                        - dataType : String
+                        - code html cho component
+                    templateUrl
+                        - path to html file of component
+                    style
+                        - dataType : String
+                        - code style cho component
+                    styleUrl
+                        - path to style file of component
+            metadata
+                information
+                decorator
+            Property Binding
+                Attributes
+                    - html
+                Properties
+                    - Document Object Model
+                - Attributes initialize DOM properties and then they are done. 
+                    + Attributes values cannot change once they are initialized
+                    + Properties values howevers can change
+                binding
+                    <element [property]="variable" ></element>
+                    <element property="{{ variable }}" ></element>
+                Class Binding
+                    <element [class]="stringVar" ></element>
+                    <element [class.className]="boolVar" ></element>
+                    <element [ngClass]="objectVar" ></element>
+                        objectVar = {
+                            'class1' : boolVar1,
+                            'class2' : boolVar2,
+                        }
+                Event Binding
+                    <element (eventName)="funcName($event, ...arg)"></element>
+                Template Reference Variables
+                    - tạo 1 biến để tham chiếu tới html element
+                        + có thể truyền vào event binding function
+                            <element #referVar ></element>
+                            <element2 (event)="function(referVar)" ></element2>
+                        + refer với ngIf
+                            <ng-container *ngIf="expression; then thenTemplate; else elseTemplate"></ng-container>
+                            <ng-template #thenTemplate>
+                                
+                            </ng-template>
+                            <ng-template #elseTemplate>
+                                
+                            </ng-template>
+            ngOptions
+                ngSwitch
+                    <span [ngSwitch]="variable">
+                        <p *ngSwitchCase="case1">
+
+                        </p>
+                        <p *ngSwitchCase="case2">
+
+                        </p>
+                        <p *ngSwitchCase="case3">
+
+                        </p>
+                        <p *ngSwitchDefault>
+
+                        </p>
+                    </span>
+                ngFor
+                    <div *ngFor="let color of colors; first as f">
+                        <h2>{{ f }} {{ color }}</h2>
+                    </div>
+                ngProps
+                    script 
+                        export class DemoComponent implements OnInit {
+                            @Input('ngProp') public parentData;
+                                sử dụng như 1 attribute bình thường của class
+                    parent
+                        <div app-demo [ngProp]="{ name: 'Duy' }" ></div>
+                ngEmmit
+                    script
+                        export class DemoComponent implements OnInit {
+                            @Output('emitEvent') public demoEmit = new EventEmitter();
+                            demoClick(event: Event) {
+                                this.demoEmit.emit({event : 'event from child'});
+                            }
+                    parent
+                        <div app-demo (emitEvent)="childEvent($event)"></div>
+        Pipe
+            - Way to transform data before show it
+        Service         
+            Business logic
+            
+CLI
+    generate
+        # Template 
+            ng generate <schematic> file_name [options]
+            ng g <schematic> file_name [options]
+        Schematic
+            appShell
+            application
+            class
+            component
+            directive
+            enum
+            guard
+            interceptor
+            interface
+            library
+            module
+            pipe
+            service
+            serviceWorker
+            webWorker
+        Options
+
+HttpClientModule
+    - Chuyên dùng để gọi api cho backend
+    # app.module.ts 
+        import { HttpClientModule } from '@angular/common/http';
+        
+        @NgModule({
+            declarations: [
+                ...
+            ],
+            imports: [
+                ...
+                HttpClientModule
+            ],
+            providers: [],
+            bootstrap: [AppComponent]
+        })
+        export class AppModule { }
+    HttpClient
+        - Dùng để gọi http api
+            # Code
+                export class EmployeeService {
+
+                    constructor(private http: HttpClient) {} 
+
+                    getEmployees(): Observable<IEmployee[]> {
+                        return this.http.get<IEmployee[]>(this._url);
+                    }
+                }
+
+rxjs
+    Observable
+    catchError
+    throwError

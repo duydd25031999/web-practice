@@ -1,0 +1,386 @@
+compile
+    Abstract syntax tree (AST)
+        - Source Code =parsed=> compiler =transforms=> Abstract syntax tree 
+        - A data structure that ignores things like whitespace, comments, tabs
+        - Abstract syntax tree =parsed=> compiler =converts=> bytecode =evaluated=> runtime
+    TypeScript Compiler (TSC)
+        TYPECHECKER
+            - A special program that verifies that your code is typesafe.
+        1. TypeScript source -> TypeScript AST
+        2. TypeScript AST is checkec by TYPECHECKER
+        3. TypeScript AST -> Javascript source
+        4. Javascript source -> Javascript AST
+        5. Javascript AST -> bytecode
+        6. bytecode -> evaluated in runtime
+
+tsconfig.json
+    include 
+        - Which folders should TSC look in to find your TypeScript files?
+    lib 
+        - Which APIs should TSC assume exist in the environment you’ll be running your code in? 
+        - This includes things like ES5’s Function.prototype.bind , ES2015’s Object.assign , and the DOM’s document.querySelector .
+    module 
+        - Which module system should TSC compile your code to (CommonJS, SystemJS, ES2015, etc.)?
+    outDir 
+        - Which folder should TSC put your generated JavaScript code in?
+    strict 
+        - Be as strict as possible when checking for invalid code. This option enforces that all of your code is properly typed. We’ll be using it for all of the examples in the book, and you should use it for your TypeScript project too.
+    target 
+        - Which JavaScript version should TSC compile your code to (ES3, ES5, ES2015, ES2016, etc.)?
+
+tslint.json
+
+datatype
+    TYPE LITERAL
+        - A type that represents a single value and nothing else.
+            #Code
+                let x : true;
+                x = true;
+        - Nếu assign 'x' = 1 giá trị khác != type của nó => error
+         + undefined, null đều không được
+    STRUCTURAL TYPING
+        A style of programming
+        - chỉ biết là nó là 1 obj, không quan tâm attributes, (giống Object trong Java)
+    ! type of const = its value
+        #Code
+            const b = 5678n //5678n  
+    DEFINITE ASSIGNMENT
+        - JavaScript pattern, khi khai báo một variable thì ta sẽ initialize it 1 value ứng với type mà ta muốn
+            #Code
+                var a = ""      // string
+                var a = true    // boolean
+                var a = 0       // number
+                var a = {}      // object
+                var a = []      //array
+        - Typescript chỉ cần defind type là được rồi
+            + Nhưng phải make sure là value được assigned trước khi used
+                #Code
+                    let i: number
+                    let j = i * 3   // Error TS2454: Variable 'i' is used
+                                    // before being assigned.
+                    let i           // 'undefined'.
+                    let j = i * 3   // Error TS2532: Object is possibly
+    unknow
+        - Có thể chứa mọi value, nhưng không thể dùng biến cho bất kì phép tính nào
+            + Chỉ có thể  dùng trong các phép tính khi nó được defind type 
+        any
+            - Godfather of types
+                + Default type
+                + Có thể chứa bất kì value nào
+            - When compile from Typescript to Javascript
+                + Everything needs to have a type
+            void
+                undefined
+            null
+            number
+                Number Enum
+            bigint
+                - bigint = int + n
+                    #Code
+                        let a = 1234n //bigint
+                        const b = 5678n //5678n
+            boolean
+            string
+                String Enum
+            symbol
+                Unique Symbol
+            object
+                - khi để object thì TYPECHECKER chỉ biết nó là object, không biết nó có những attributes gì 
+                    + ko cho access attributes
+                    + chỉ có thể  biết nó là object (không phải null, undefinded, ...)
+                - để có thể truy cập 
+                    + để any
+                        #Code
+                            let a = {
+                                b: 'x'
+                            }        // {b: string}
+                            a.b      // string
+                    + defind cụ thể attribute của nó
+                        => Ko cho thêm bới atributes
+                        #Code
+                            let a: { b: number } = {
+                                b: 12
+                            };
+                            a.c = "Duy"; //Error
+                        . Có nhiều options để defind attributes của 1 object
+                            #Code
+                                let a: {
+                                    b: number;                // 'b' chắc chắn phải có
+                                    c?: string;               // 'c' có thể  có hoặc không
+                                    [key: number]: boolean;   // tất cả các attributes còn lại
+                                                                //      phải là  number và nhận value là boolean
+                                };
+
+                                a = {
+                                    b: 10,
+                                    10: true,
+                                    20: false
+                                };
+
+                                a = { b: 1, c: undefined };
+                                a = { b: 1 };
+                                a = { b: 1, c: "d" };
+                                a = { b: 1, 10: true };
+                                a = { b: 1, 10: true, 20: false };
+                                a = { 10: true };                       // Error TS2741: Property 'b' is missing in type
+                                a = { b: 1, 33: "red" };                // Error TS2741: Type 'string' is not assignable
+                                                                        // to type 'boolean'.
+                - valid object
+                    Value           {}      object  Object
+                    {}              Yes     Yes     Yes
+                    ['a']           Yes     Yes     Yes
+                    function () {}  Yes     Yes     Yes
+                    new String('a') Yes     Yes     Yes
+                    'a'             Yes     No      Yes
+                    1               Yes     No      Yes
+                    Symbol('a')     Yes     No      Yes
+                    null            No      No      No
+                    undefined       No      No      No
+                Type aliases
+                    - Định nghĩa type cho variable = 1 tên khác
+                        #Code
+                            type Age = number
+                            let age: Age = 55
+
+                            type Person = {
+                                name: string
+                                age: Age
+                            }
+                            let driver: Person = {
+                                name: 'James May'
+                                age: age
+                            }
+                    - Block-scoped
+                        + Không thể  assign 2 value cho 1 type trong cùng 1 scrope
+                            #Code
+                                type Color = 'red'
+                                type Color = 'blue' // Error TS2300: Duplicate identifier 'Color'.
+                        + Có thề  reassign value của type trong 1 child scope
+                            . vì child scope ko phải parent scope
+                                #Code
+                                    type Color = 'red'
+                                    let x = Math.random() < .5
+                                    if (x) {
+                                        type Color = 'blue' // This shadows the Color declared above.
+                                        let b: Color = 'blue'
+                                    } else {
+                                        let c: Color = 'red'
+                                    }
+                    Union and intersection types
+                        - Union: | (hợp)
+                        - Intersection: & (giao)
+                        #Code
+                            type Cat = {name: string, purrs: boolean}
+                            type Dog = {name: string, barks: boolean, wags: boolean}
+                            type CatOrDogOrBoth = Cat | Dog = {name: string, purrs: boolean , barks: boolean, wags: boolean}
+                            type CatAndDog = Cat & Dog = {name: string}
+
+                            type Returns = string | null;
+                            function trueOrNull(isTrue: boolean): Returns {
+                                if (isTrue) {
+                                    return 'true';
+                                }
+                                return null;
+                            }
+                Array
+                    #Code
+                        let a = [1, 2, 3]           // number[]
+                        var b = ['a', 'b']          // string[]
+                        let c: string[] = ['a']     // string[]
+                        let d = [1, 'a']            // (string | number)[]
+                        const e = [2, 'b']          // (string | number)[]
+
+                        let f = ['string 1'];       // defind này tương đương với 
+                                                    // let f: string[] = ['string 1']; 
+                        f.push('string 2');
+                        f.push(true);               // Error TS2345: Argument of type 'true' is not
+                                                    // assignable to parameter of type 'string'.
+
+                        let g = []                  // any[]
+                        g.push(1)                   // number[]
+                        g.push('red')               // (string | number)[]
+
+                        let h: number[] = []        // number[]
+                        h.push(1)                   // number[]
+                        h.push('red')               // Error TS2345: Argument of type '"red"' is not
+                                                    // assignable to parameter of type 'number'.
+                    ! T[] == Array<T> .
+                    Tuple
+                        - Định nghĩa type trong array thay vì array
+                            #Code
+                                let a: [number] = [1]
+                                // A tuple of [first name, last name, birth year]
+                                let b: [string, string, number] = ['malcolm', 'gladwell', 1963]
+                                b = ['queen', 'elizabeth', 'ii', 1926]  // Error TS2322: Type 'string' is not
+                                                                        // assignable to type 'number'.
+                                let trainFares: [number, number?][] = [
+                                    [3.75],
+                                    [8.25, 7.70],
+                                    [10.50]
+                                ]
+                                let list: [number, boolean, ...string[]] = [1, false, 'a', 'b', 'c']
+                            - Readonly array
+                                type A = readonly string[]           // readonly string[]
+                                type B = ReadonlyArray<string>       // readonly string[]
+                                type C = Readonly<string[]>          // readonly string[]
+                
+                                type D = readonly [number, string]   // readonly [number, string]
+                                type E = Readonly<[number, string]>  // readonly [number, string]
+                Enum
+                    #Code
+                        //Typescript
+                        enum Language {
+                            English = 0,
+                            Spanish = 1,
+                            Russian = 2
+                        }
+                        //Javascript
+                        var Language;
+                        (function (Language) {
+                            Language[Language["English"] = 0] = "English";
+                            Language[Language["Spanish"] = 1] = "Spanish";
+                            Language[Language["Russian"] = 2] = "Russian";
+                        })(Language || (Language = {}));
+                        //Console
+                        {
+                            English: 0
+                            Spanish: 1
+                            Russian: 2
+                            0: "English"
+                            1: "Spanish"
+                            2: "Russian"
+                        }
+                    #Code
+                        //Typescript
+                        enum Color {
+                            Red,
+                            Blue
+                        }
+                        //Javascript
+                        var Color;
+                        (function (Color) {
+                            Color[Color["Red"] = 0] = "Red";
+                            Color[Color["Blue"] = 1] = "Blue";
+                        })(Color || (Color = {}));
+                        //Console
+                        {
+                            Red: 0
+                            Blue: 1
+                            0: "Red"
+                            1: "Blue"
+                        }
+                Function
+                    #Code
+                        function add(
+                            a: number,          // required         number  
+                            b: number | string  // required         number | string
+                            c?: number          // not required     number
+                        ): number               // return number
+                        {
+                            return a + b
+                        }
+                        function sumVariadicSafe(...numbers: number[]): number {
+                            return numbers.reduce((total, n) => total + n, 0)
+                        }
+                        sumVariadicSafe(1, 2, 3) // evaluates to 6
+                    Type of function
+                        #Code
+                            type Sum = (a: number, b: number) => number;
+                            let sum: Sum = (a: number, b: number) => {  // khi khai báo arguments
+                                                                        // khai báo đúng theo type defind
+                            return a + b;                             // không cần khai báo type của returns
+                            }
+                            // Overloaded function signatures.
+                            type Reserve = {
+                                (from: Date, to: Date, destination: string): Reservation
+                                (from: Date, destination: string): Reservation
+                            }
+
+                            let reserve: Reserve = ( //chỉ được khai báo arguments theo 1 trong n signatures.
+                                from: Date,
+                                toOrDestination: Date | string,
+                                destination?: string
+                            ) => {
+                                // ...
+                            }
+
+                        Generic Type
+                            #Code
+                                type Filter<T> = {
+                                    (array: T[], f: (item: T) => boolean): T[]
+                                }
+                                // Wrong
+                                let filter: Filter = (array, f) =>  // Error TS2314: Generic type 'Filter'
+                                                                    // requires 1 type argument(s).
+                                type OtherFilter = Filter           // Error TS2314: Generic type 'Filter' 
+                                                                    // requires 1 type argument(s).
+                                // Right
+                                let filter: Filter<number> = (array, f) =>
+                                type StringFilter = Filter<string>
+                                let stringFilter: StringFilter = (array, f) =>
+
+                    Generated Function  
+                        - Là một hàm encode từ 1 loop-scope đề có thể gọi từng vòng loop proactively (chủ động)
+                            #Code
+                                function* createFibonacciGenerator() {                              // '*' biểu thị cho 1 generator builder
+                                    let firstNum = 0;                                               // biến thuộc parent của generator (= builder) => closure
+                                    let secondNum = 1;
+
+                                    for (let i = 0; i < 5; i++) {                                   // loop sẽ được encode thành 1 function để mỗi lần call = 1 vòng loop
+                                        yield firstNum;                                             // value of yield = return.value
+                                        [firstNum, secondNum] = [secondNum, firstNum + secondNum];
+                                    }
+                                }
+
+                                let fibonacciGenerator = createFibonacciGenerator();
+
+                                fibonacciGenerator.next();                                          // loop lần 1 =return=> {value: 0, done: false}
+                                fibonacciGenerator.next();                                          // loop lần 2 =return=> {value: 1, done: false}
+                                fibonacciGenerator.next();                                          // loop lần 3 =return=> {value: 1, done: false}
+                                fibonacciGenerator.next();                                          // loop lần 4 =return=> {value: 2, done: false}
+                                fibonacciGenerator.next();                                          // loop lần 5 =return=> {value: 3, done: false}
+                                fibonacciGenerator.next();                                          // loop lần 6 =return=> {value: undefined, done: true}
+                                fibonacciGenerator.next();                                          // loop lần 7 =return=> {value: undefined, done: true}
+    class
+        #Code
+            type Color = "Black" | "White";
+            type Letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H";
+            type Rank = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
+            class Position {
+                constructor(private letter: Letter, private rank: Rank) {}
+            }
+
+            class Piece {
+                protected position: Position;
+                constructor(private readonly color: Color, letter: Letter, rank: Rank) {
+                    this.position = new Position(letter, rank);
+                }
+            }
+        Encapsulation | Access Modifiers
+      
+            public
+                - Accessible from anywhere. This is the default access level.
+            protected
+                - Accessible from instances of this class and its subclasses.
+            private
+                - Accessible from instances of this class only.
+        Inheritance
+            #Code
+                class King extends Piece {}
+                class Queen extends Piece {}
+                class Bishop extends Piece {}
+                class Knight extends Piece {}
+                class Rook extends Piece {}
+                class Pawn extends Piece {}
+        Polymorphism
+        Abstraction
+            #Code
+                abstract class Piece {
+                    // ...
+                    moveTo(position: Position) {
+                        this.position = position
+                    }
+                    abstract canMoveTo(position: Position): boolean
+                }
+        
